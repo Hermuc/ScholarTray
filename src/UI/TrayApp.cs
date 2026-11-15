@@ -12,6 +12,7 @@ namespace ScholarTray.UI
         private readonly AppConfig _cfg;
         private readonly Logger _log;
         private readonly StateProbe _probe;
+        private readonly EmbeddedTool _embedded;
         private readonly ToolRunner _runner;
         private readonly WifiProbe _wifi;
         private readonly TrayMenu _menu;
@@ -34,7 +35,8 @@ namespace ScholarTray.UI
             _log = new Logger(_cfg.LogEnabled, AppPaths.LogFile);
             _log.Info("=== ScholarTray 启动 ===");
             _probe = new StateProbe(_log);
-            _runner = new ToolRunner(_cfg, _log);
+            _embedded = new EmbeddedTool(_log);
+            _runner = new ToolRunner(_cfg, _log, _embedded);
             _wifi = new WifiProbe(_log);
             _iconOn = TrayResources.Opened;
             _iconOff = TrayResources.Closed;
@@ -218,6 +220,7 @@ namespace ScholarTray.UI
             if (_cleaned) return;
             _cleaned = true;
             _log.Info("=== ScholarTray 退出，清理托盘 ===");
+            try { if (_embedded != null) _embedded.Dispose(); } catch { }
             try { if (_poll != null) { _poll.Stop(); _poll.Dispose(); } } catch { }
             try { if (_notify != null) { _notify.Visible = false; _notify.Dispose(); } } catch { }
             try { if (_menu != null) _menu.Menu.Dispose(); } catch { }

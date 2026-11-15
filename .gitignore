@@ -3,6 +3,9 @@
 *.pdb
 *.dll
 
+# 例外：内嵌用的工具本体是构建必需素材，随源码一起管理
+!assets/scholartools.exe
+
 # 本地配置与日志（不应提交）
 ScholarTray.ini
 ScholarTray.log

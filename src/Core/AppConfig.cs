@@ -11,6 +11,10 @@ namespace ScholarTray.Core
     internal sealed class AppConfig
     {
         public string ToolPath { get; private set; }
+
+        /// <summary>是否优先使用内嵌在 exe 里的工具本体（默认 true，单文件绿色）。</summary>
+        public bool UseEmbeddedTool { get; private set; }
+
         public InvokeMode Mode { get; private set; }
         public bool LogEnabled { get; private set; }
         public int TimeoutSeconds { get; private set; }
@@ -29,6 +33,7 @@ namespace ScholarTray.Core
         {
             AppConfig c = new AppConfig();
             c.ToolPath = null;
+            c.UseEmbeddedTool = true;     // 单文件：默认直接用内嵌的工具本体
             c.Mode = InvokeMode.MenuInput;
             c.LogEnabled = false;          // 绿色：默认不写任何日志
             c.TimeoutSeconds = 180;
@@ -52,6 +57,7 @@ namespace ScholarTray.Core
                     switch (k)
                     {
                         case "toolpath": c.ToolPath = v; break;
+                        case "useembeddedtool": c.UseEmbeddedTool = IsTrue(v, true); break;
                         case "invokemode":
                             c.Mode = (v.ToLowerInvariant() == "cli") ? InvokeMode.CliArgs : InvokeMode.MenuInput;
                             break;

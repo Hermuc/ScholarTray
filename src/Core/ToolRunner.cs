@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Threading;
 
@@ -20,13 +21,39 @@ namespace ScholarTray.Core
     {
         private readonly AppConfig _cfg;
         private readonly Logger _log;
+        private readonly EmbeddedTool _embedded;
 
-        public ToolRunner(AppConfig cfg, Logger log) { _cfg = cfg; _log = log; }
+        public ToolRunner(AppConfig cfg, Logger log, EmbeddedTool embedded)
+        {
+            _cfg = cfg;
+            _log = log;
+            _embedded = embedded;
+        }
+
+        /// <summary>
+        /// 解析要执行的工具路径。优先级：
+        ///   1) ini 显式 ToolPath（用户强制指定，最高优先）
+        ///   2) 内嵌工具本体（默认，单文件绿色，释放到进程私有临时目录）
+        ///   3) 磁盘上的就近搜索（兼容未内嵌/自定义部署）
+        /// </summary>
+        public string ResolveExecutable()
+        {
+            if (!string.IsNullOrEmpty(_cfg.ToolPath))
+            {
+                try { if (File.Exists(_cfg.ToolPath)) return Path.GetFullPath(_cfg.ToolPath); } catch { }
+            }
+            if (_cfg.UseEmbeddedTool && _embedded != null && EmbeddedTool.IsEmbedded)
+            {
+                string ex = _embedded.EnsureExtracted();
+                if (ex != null) return ex;
+            }
+            return AppPaths.ResolveTool(_cfg.ToolPath);
+        }
 
         public ToolResult Run(bool open)
         {
             ToolResult r = new ToolResult();
-            string exe = AppPaths.ResolveTool(_cfg.ToolPath);
+            string exe = ResolveExecutable();
             if (exe == null)
             {
                 r.FailureReason = "找不到 scholartools.exe";
@@ -37,7 +64,9 @@ namespace ScholarTray.Core
             {
                 ProcessStartInfo psi = new ProcessStartInfo();
                 psi.FileName = exe;
-                psi.WorkingDirectory = AppPaths.BaseDirectory;
+                // 复刻「在工具所在目录运行」的原始行为；部分工具可能依赖同目录文件
+                string toolDir = Path.GetDirectoryName(exe);
+                psi.WorkingDirectory = string.IsNullOrEmpty(toolDir) ? AppPaths.BaseDirectory : toolDir;
                 psi.UseShellExecute = false;
                 psi.CreateNoWindow = true;
                 psi.RedirectStandardInput = true;
@@ -78,6 +107,9 @@ namespace ScholarTray.Core
                         r.ExitCode = p.ExitCode;
                         t1.Join(3000);
                         t2.Join(3000);
+                        // 工具进程已退出：立即删除临时释放的本体，缩短临时文件存活期
+                        // （若使用外置 ToolPath，此调用是安全的空操作）
+                        if (_embedded != null) _embedded.TryRemoveExtracted();
                     }
                     else
                     {

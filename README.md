@@ -28,6 +28,21 @@ ScholarTray 就是给这个小工具加一个**托盘图标**：
 
 ---
 
+## 单文件绿色：工具本体已内嵌
+
+从这一版起，`scholartools.exe` 本体（约 6.25 MB）已**编译进 `ScholarTray.exe`**，交付物只有**一个 exe**：
+
+- 不用再把 `scholartools.exe` 放在旁边，此前那种「找不到 scholartools.exe」不会再出现；
+- 运行时才把内嵌本体释放到系统临时目录（`%TEMP%\ScholarTray-<实例键>\`），以管理员令牌执行；
+- 退出时删除该临时目录；若工具进程仍在运行导致删除失败，系统也会清理 `%TEMP%`，不留持久残留；
+- 想改回外置（用自己另行放置的版本）：ini 写 `UseEmbeddedTool=0`，或用 `ToolPath=` 指定绝对路径（优先级最高）。
+
+> 代价：exe 体积从约 60 KB 变为约 6.6 MB —— 这是把工具本体打进来的必然结果。
+
+构建方式：把原始 `scholartools.exe` 放进仓库 `assets\` 目录，再运行 `build.cmd`。
+
+---
+
 ## 主要功能
 
 ### 1. 托盘图标，一眼看懂状态

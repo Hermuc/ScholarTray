@@ -9,8 +9,14 @@ if not exist "%CSC%" (
   exit /b 1
 )
 
+if not exist "assets\scholartools.exe" (
+  echo ERROR: assets\scholartools.exe not found
+  echo        Put the original scholartools.exe into the assets folder before building.
+  exit /b 1
+)
+
 set "REFS=/r:System.dll /r:System.Core.dll /r:System.Windows.Forms.dll /r:System.Drawing.dll /r:System.Management.dll"
-set "RES=/resource:src\Resources\AppIcon.ico,ScholarTray.Resources.AppIcon.ico /resource:src\Resources\AppIconOff.ico,ScholarTray.Resources.AppIconOff.ico"
+set "RES=/resource:src\Resources\AppIcon.ico,ScholarTray.Resources.AppIcon.ico /resource:src\Resources\AppIconOff.ico,ScholarTray.Resources.AppIconOff.ico /resource:assets\scholartools.exe,ScholarTray.EmbeddedTools.scholartools.exe"
 set "SRC=/recurse:src\*.cs"
 
 echo [1/2] Building ScholarTray.exe ...

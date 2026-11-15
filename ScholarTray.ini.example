@@ -1,7 +1,10 @@
 # ScholarTray 可选配置。复制为同目录的 ScholarTray.ini 后生效。
 # 全部可省略，零配置即可运行。
 
-# scholartools.exe 绝对路径（默认自动搜索某几个常见位置）
+# 是否使用内嵌在 exe 里的工具本体（默认 1）。为 0 时回退到磁盘就近搜索，兼容外置部署
+# UseEmbeddedTool=1
+
+# scholartools.exe 绝对路径（优先级最高；默认自动搜索几个常见位置，或直接用内嵌本体）
 # ToolPath=D:\UserData\Downloads\学术工具\scholartools.exe
 
 # 驱动方式：menu = 向 stdin 注入 "1"/"2"（默认，对应教程）

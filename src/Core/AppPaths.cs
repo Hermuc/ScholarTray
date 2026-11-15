@@ -50,6 +50,40 @@ namespace ScholarTray.Core
         }
 
         /// <summary>
+        /// 用户「下载」文件夹的真实位置。优先读注册表的已知文件夹（它可能被重定向到
+        /// D:\UserData\Downloads 这类位置），失败才退化为 %USERPROFILE%\Downloads。
+        /// 全部运行时推导，不写死任何盘符或用户名。
+        /// </summary>
+        public static string DownloadsDirectory
+        {
+            get
+            {
+                try
+                {
+                    using (Microsoft.Win32.RegistryKey k = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(
+                        @"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders"))
+                    {
+                        if (k != null)
+                        {
+                            object v = k.GetValue("{374DE290-123F-4565-9164-39C4925E467B}");
+                            string s = v as string;
+                            if (!string.IsNullOrEmpty(s))
+                                return Environment.ExpandEnvironmentVariables(s);
+                        }
+                    }
+                }
+                catch { }
+                try
+                {
+                    string profile = Environment.GetEnvironmentVariable("USERPROFILE");
+                    if (!string.IsNullOrEmpty(profile)) return Path.Combine(profile, "Downloads");
+                }
+                catch { }
+                return null;
+            }
+        }
+
+        /// <summary>
         /// 工具位置候选，按优先级：显式配置 → exe 同目录 → 上级目录 → 用户下载目录 → 各固定盘常见目录。
         /// 全部基于运行时环境推导，不写死任何盘符或用户名。
         /// </summary>
@@ -64,6 +98,15 @@ namespace ScholarTray.Core
             {
                 yield return Path.Combine(parent, "scholartools.exe");
                 yield return Path.Combine(parent, "学术工具", "scholartools.exe");
+            }
+
+            // 用户「下载」已知文件夹（可能被重定向，例如 D:\UserData\Downloads）。
+            // 同时覆盖「exe 直接躺在下载目录」与「下载\学术工具\」两种布局。
+            string downloads = DownloadsDirectory;
+            if (!string.IsNullOrEmpty(downloads))
+            {
+                yield return Path.Combine(downloads, "scholartools.exe");
+                yield return Path.Combine(downloads, "学术工具", "scholartools.exe");
             }
 
             string profile = Environment.GetEnvironmentVariable("USERPROFILE");
@@ -86,6 +129,7 @@ namespace ScholarTray.Core
             catch { }
             foreach (string root in roots)
             {
+                yield return Path.Combine(root, "UserData", "Downloads", "scholartools.exe");
                 yield return Path.Combine(root, "UserData", "Downloads", "学术工具", "scholartools.exe");
             }
         }
