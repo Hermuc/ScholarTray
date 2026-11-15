@@ -1,0 +1,28 @@
+# ScholarTray 可选配置。复制为同目录的 ScholarTray.ini 后生效。
+# 全部可省略，零配置即可运行。
+
+# scholartools.exe 绝对路径（默认自动搜索某几个常见位置）
+# ToolPath=D:\UserData\Downloads\学术工具\scholartools.exe
+
+# 驱动方式：menu = 向 stdin 注入 "1"/"2"（默认，对应教程）
+#           cli  = 直接传 install / uninstall 参数
+# InvokeMode=menu
+
+# 是否在开启前检查校园网（默认 1 开启）
+# WifiCheckEnabled=1
+
+# 允许的校园网 SSID，逗号/分号/竖线分隔，忽略大小写
+# 支持 "NCWU 2"、"NCWU-5G" 这类带后缀的真实 SSID，但不会误匹配 "NCWUX"
+# WifiAllowedSsid=NCWU,ncwu
+
+# 不在校园网时是否仍然放行（默认 0：拦截并提示"请连接校园网"）
+# WifiBypassWhenNotCampus=0
+
+# 是否写同目录 ScholarTray.log（默认 0，保持绿色无痕）
+# LogEnabled=0
+
+# 单次动作超时秒数（10..900，默认 180；DoH 解析约 380 个域名较慢）
+# TimeoutSeconds=180
+
+# 启动时若状态为"已关闭"是否自动开启（默认 1）
+# AutoOpenOnStart=1
